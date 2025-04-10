@@ -5,7 +5,10 @@
 1. 添加新角色
 2. 删除已有角色
 3. 管理角色列表
+4. 保存/加载角色数据
 """
+import json
+import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QPushButton, QLineEdit, QHBoxLayout
 
 class SettingsTab(QWidget):
@@ -55,3 +58,27 @@ class SettingsTab(QWidget):
         current_item = self.character_list.currentItem()
         if current_item:
             self.character_list.takeItem(self.character_list.row(current_item))
+            
+    def get_character_list(self):
+        """获取当前角色列表"""
+        characters = []
+        for i in range(self.character_list.count()):
+            characters.append(self.character_list.item(i).text())
+        return characters
+        
+    def save_characters(self):
+        """保存角色数据到JSON文件"""
+        data = {
+            "characters": self.get_character_list()
+        }
+        with open('data.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+            
+    def load_characters(self):
+        """从JSON文件加载角色数据"""
+        if os.path.exists('data.json'):
+            with open('data.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self.character_list.clear()
+                for character in data.get('characters', []):
+                    self.character_list.addItem(character)

@@ -36,9 +36,26 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.settings_tab, "设定")
         self.tabs.addTab(self.setup_tab, "设置")
         self.tabs.addTab(self.about_tab, "关于")
+        
+        # 连接信号，当切换标签页时同步角色数据
+        self.tabs.currentChanged.connect(self.sync_character_data)
+        
+    def sync_character_data(self):
+        """同步设定页面和关系图界面的角色数据"""
+        characters = self.settings_tab.get_character_list()
+        self.relation_graph_tab.update_character_list(characters)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
+    
+    # 加载保存的数据
+    window.settings_tab.load_characters()
+    window.relation_graph_tab.load_relations()
+    
+    # 应用关闭时保存数据
+    app.aboutToQuit.connect(window.settings_tab.save_characters)
+    app.aboutToQuit.connect(window.relation_graph_tab.save_relations)
+    
     window.show()
     sys.exit(app.exec_())
